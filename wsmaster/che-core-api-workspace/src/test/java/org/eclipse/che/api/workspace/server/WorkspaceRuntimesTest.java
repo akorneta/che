@@ -80,6 +80,9 @@ public class WorkspaceRuntimesTest {
 
   @Mock private ProbeScheduler probeScheduler;
 
+  @Mock
+  WorkspaceStatusCache cache;
+
   private RuntimeInfrastructure infrastructure;
   @Mock private InternalEnvironmentFactory<InternalEnvironment> testEnvFactory;
   private WorkspaceRuntimes runtimes;
@@ -96,7 +99,8 @@ public class WorkspaceRuntimesTest {
             sharedPool,
             workspaceDao,
             dbInitializer,
-            probeScheduler);
+            probeScheduler,
+            cache);
   }
 
   @Test
@@ -169,7 +173,8 @@ public class WorkspaceRuntimesTest {
             sharedPool,
             workspaceDao,
             dbInitializer,
-            probeScheduler);
+            probeScheduler,
+            cache);
     localRuntimes.init();
     RuntimeIdentityDto identity =
         DtoFactory.newDto(RuntimeIdentityDto.class)

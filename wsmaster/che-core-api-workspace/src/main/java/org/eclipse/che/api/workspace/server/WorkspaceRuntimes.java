@@ -84,7 +84,7 @@ public class WorkspaceRuntimes {
   private static final Logger LOG = LoggerFactory.getLogger(WorkspaceRuntimes.class);
 
   private final ConcurrentMap<String, InternalRuntime<?>> runtimes;
-  private final ConcurrentMap<String, WorkspaceStatus> statuses;
+  private final WorkspaceStatusCache statuses;
   private final EventService eventService;
   private final WorkspaceSharedPool sharedPool;
   private final WorkspaceDao workspaceDao;
@@ -101,10 +101,11 @@ public class WorkspaceRuntimes {
       WorkspaceSharedPool sharedPool,
       WorkspaceDao workspaceDao,
       @SuppressWarnings("unused") DBInitializer ignored,
-      ProbeScheduler probeScheduler) {
+      ProbeScheduler probeScheduler,
+      WorkspaceStatusCache statusCache) {
     this.probeScheduler = probeScheduler;
     this.runtimes = new ConcurrentHashMap<>();
-    this.statuses = new ConcurrentHashMap<>();
+    this.statuses = statusCache;
     this.eventService = eventService;
     this.sharedPool = sharedPool;
     this.workspaceDao = workspaceDao;
@@ -240,7 +241,8 @@ public class WorkspaceRuntimes {
       }
 
       Subject subject = EnvironmentContext.getCurrent().getSubject();
-      RuntimeIdentity runtimeId = new RuntimeIdentityImpl(workspaceId, envName, subject.getUserId());
+      RuntimeIdentity runtimeId =
+          new RuntimeIdentityImpl(workspaceId, envName, subject.getUserId());
 
       InternalEnvironment internalEnv = createInternalEnvironment(environment);
       RuntimeContext runtimeContext = infrastructure.prepare(runtimeId, internalEnv);

@@ -93,8 +93,8 @@ public abstract class InternalRuntime<T extends RuntimeContext> implements Runti
   /**
    * Returns workspace status.
    *
-   * <p>Note that by default status is STARTING since
-   * context preparing is a part of workspace start.
+   * <p>Note that by default status is STARTING since context preparing is a part of workspace
+   * start.
    */
   public WorkspaceStatus getStatus() {
     return status == null ? WorkspaceStatus.STARTING : status;
