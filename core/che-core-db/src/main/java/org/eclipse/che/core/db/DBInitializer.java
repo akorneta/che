@@ -11,6 +11,7 @@
 package org.eclipse.che.core.db;
 
 import com.google.common.collect.ImmutableMap;
+import java.lang.reflect.Field;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -20,6 +21,10 @@ import org.eclipse.che.core.db.jpa.eclipselink.GuiceEntityListenerInjectionManag
 import org.eclipse.che.core.db.schema.SchemaInitializationException;
 import org.eclipse.che.core.db.schema.SchemaInitializer;
 import org.eclipse.persistence.internal.sessions.AbstractSession;
+import org.eclipse.persistence.internal.sessions.coordination.jgroups.JGroupsRemoteConnection;
+import org.eclipse.persistence.sessions.coordination.RemoteCommandManager;
+import org.eclipse.persistence.sessions.coordination.TransportManager;
+import org.slf4j.LoggerFactory;
 
 /**
  * Initializes database components.
@@ -71,6 +76,18 @@ public class DBInitializer {
   public void setUpInjectionManager(
       GuiceEntityListenerInjectionManager injManager, EntityManagerFactory emFactory) {
     final AbstractSession session = emFactory.unwrap(AbstractSession.class);
+    try {
+      RemoteCommandManager commandManager = (RemoteCommandManager) session.getCommandManager();
+      TransportManager transportManager = commandManager.getTransportManager();
+      JGroupsRemoteConnection conn =
+          (JGroupsRemoteConnection) transportManager.getConnectionToLocalHost();
+      final Field isLocal = conn.getClass().getDeclaredField("isLocal");
+      isLocal.setAccessible(true);
+      isLocal.set(conn, false);
+    } catch (Exception ex) {
+      LoggerFactory.getLogger(DBInitializer.class).error("Failed to set by reflection");
+    }
+
     session.setInjectionManager(injManager);
   }
 
